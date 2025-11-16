@@ -1,0 +1,3 @@
+agency_id,agency_name,agency_url,agency_timezone,agency_lang,agency_phone
+BKK,BKK,http://www.bkk.hu,Europe/Budapest,hu,+36 1 3 255 255
+HEV,MÁV Személyszállítási Zrt. - HÉV,https://mavcsoport.hu,Europe/Budapest,hu,+36 (1) 3 49 49 49

@@ -1,0 +1,1 @@
+zip -r budapest_gtfs.zip budapest_gtfs -x "*/.venv/*"
