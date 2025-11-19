@@ -55,10 +55,10 @@ def a_star(start, goal, h, neighbors, d):
     A* pathfinding algorithm.
 
     Args:
-        start: Starting node
-        goal: Goal node
+        start: Starting stop_id
+        goal: Goal stop_id
         h: Heuristic function h(n) that estimates cost from n to goal
-        neighbors: Function that returns neighbors of a node
+        neighbors: Function that returns neighbors of a stop_id
         d: Function d(current, neighbor) that returns edge weight
 
     Returns:
@@ -73,11 +73,11 @@ def a_star(start, goal, h, neighbors, d):
     # For tracking the path
     came_from = {}
 
-    # Cost from start to each node
+    # Cost from start to each stop_id
     g_score = defaultdict(lambda: float('inf'))
     g_score[start] = 0
 
-    # Estimated total cost from start to goal through each node
+    # Estimated total cost from start to goal through each stop_id
     f_score = defaultdict(lambda: float('inf'))
     #f_score[start] = h(start)
     f_score[start] = h(start,goal)
@@ -87,7 +87,7 @@ def a_star(start, goal, h, neighbors, d):
     open_set_hash = {start}
 
     while open_set:
-        # Get node with lowest f_score
+        # Get stop_id with lowest f_score
         _, current = heapq.heappop(open_set)
         open_set_hash.remove(current)
 
