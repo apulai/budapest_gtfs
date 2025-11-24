@@ -1,1 +1,10 @@
 zip -r budapest_gtfs.zip budapest_gtfs -x "*/.venv/*"
+
+
+df_megallo_jaratok = pd.merge( df_stop_times.query(f'stop_id == "{stop_id}" and arrival_time > "10:00:00"'), df_trips, left_on="trip_id", right_on="trip_id").sort_values(["arrival_time"]).drop_duplicates("route_id")
+df_megallo_jaratok["stop_id"]=stop_id
+df_megallo_jaratok["stop_name"]=stop_name
+
+df_megallo_jaratok[["stop_id","stop_name","route_id","arrival_time", "stop_headsign","stop_sequence"]]
+df_megallo_jaratok2 = pd.merge( df_megallo_jaratok, df_routes, left_on="route_id", right_on="route_id")
+df_megallo_jaratok2[["stop_id","stop_name","route_id","arrival_time", "route_short_name", "stop_headsign","stop_sequence"]]
