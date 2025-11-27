@@ -192,8 +192,8 @@ test_journeys = [{
     "final_stop": "F01083" # Király utca / Erzsébet körút
     },
     {
-    "start_stop": "F01755", # Margit híd, budai hídfő H
-    "final_stop": "F01083" #  Újpest Városkapu
+    "start_stop": "F01755", # Örs vezér tere M+H'
+    "final_stop": "F01083" #  Oktogon M
     },
     {
     "start_stop": "F02268", # KFKI
