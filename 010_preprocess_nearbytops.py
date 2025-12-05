@@ -5,7 +5,7 @@ import json
 import mod_distance as mydst
 import mod_loader as myload
 
-maxdst = 100
+maxdst = 200
 
 d = mydst.equirectangular_distance(47.509806,19.057151,47.509922,19.056658)
 print(d)
