@@ -21,6 +21,8 @@ git push origin main
 
 GIT reset, már nem kellenek a régi megálló pontok!
 
+git lfs track data/*
+git lfs track preproc/*
 
 F02268 Csillebérc, KFKI --> 19868321 Gödöllő, Szabadság tér
 Start time: 09:02 estimated walking time is 547.74 min.
