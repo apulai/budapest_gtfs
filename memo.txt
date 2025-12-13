@@ -1,8 +1,16 @@
+
+Algoritmus:
+
+https://www.datacamp.com/tutorial/a-star-algorithm
+https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
+
+Visualizáció:
+Folium:
+https://python-visualization.github.io/folium/latest/getting_started.html
+
 To save my data
 zip -r budapest_gtfs.zip budapest_gtfs -x "*/.venv/*"
 zip -r budapest_gtfs.zip budapest_gtfs -x budapest_gtfs/.git/\*  budapest_gtfs/.venv/\*
-
-
 
 
 git reset --soft $(git rev-list --max-parents=0 HEAD)
@@ -10,128 +18,4 @@ git commit -m "Initial commit"
 git log --oneline
 git push origin main --force
 
-F02268 Csillebérc, KFKI --> 19868321 Gödöllő, Szabadság tér
-Start time: 09:02 estimated walking time is 547.74 min.
-Solution found! Touched 545 stations. Length of path 9.
-a_star run time:           46.31950 seconds.
-get_neighbours run time:   46.31635 seconds. Number of calls: 84
-.
-09:02 Start                              at  Csillebérc, KFKI                    F02268    .
-09:16 take    221   2210     D0652622398 to  Széll Kálmán tér M                  F02473    . Arrive at 09:37
-09:37 walk 191                         m to  Széll Kálmán tér                    F02481    . Arrive at 09:43
-09:44 take     M2   5200        C9767114 to  Örs vezér tere                      F01749    . Arrive at 10:01
-10:01 walk 195                         m to  Örs vezér tere M+H                  F02762    . Arrive at 10:07
-10:18 take    244   2440      C984171017 to  Ida utca                            F03352    . Arrive at 10:30
-10:32 take     46   0460      C978951446 to  Mátyásföld, repülőtér H             F03308    . Arrive at 10:38
-10:38 walk 46                          m to  Mátyásföld, repülőtér               19824287  . Arrive at 10:41
-11:11 take     H8     H8       H11224_37 to  Gödöllő, Szabadság tér              19868321  . Arrive at 11:45
 
-
-F02268 Csillebérc, KFKI --> 009019 Gödöllő, Palotakert H
-Start time: 09:02 estimated walking time is 558.23 min.
-Solution found! Touched 306 stations. Length of path 7.
-a_star run time:            8.50349 seconds.
-get_neighbours run time:    8.50236 seconds. Number of calls: 16
-.
-09:02 Start                              at  Csillebérc, KFKI                    F02268    .
-09:03 take    221   2210      D057049834 to  Széll Kálmán tér M                  F02473    . Arrive at 09:25
-09:25 walk 191                         m to  Széll Kálmán tér                    F02481    . Arrive at 09:31
-09:33 take     M2   5200       C98855291 to  Örs vezér tere                      F01749    . Arrive at 09:50
-09:50 walk 118                         m to  Örs vezér tere                      19795278  . Arrive at 09:55
-10:03 take     H8     H8      H110215_37 to  Gödöllő, Palotakert                 19869324  . Arrive at 10:48
-10:48 walk 77                          m to  Gödöllő, Palotakert H               009019    . Arrive at 10:52
-
-    "H8": {
-        "route_short_name": "H8",
-        "route_desc": "Örs vezér tere / Gödöllő",
-        "0": {
-            "trip_headsign": "Gödöllő",
-            "list_of_stops": [
-                {
-                    "stop_id": "19795278",
-                    "stop_sequence": "1",
-                    "stop_name": "Örs vezér tere",
-                    "stop_lat": 47.503585,
-                    "stop_lon": 19.137192
-                },
-                   {
-                    "stop_id": "19869324",
-                    "stop_sequence": "19",
-                    "stop_name": "Gödöllő, Palotakert",
-                    "stop_lat": 47.598525,
-                    "stop_lon": 19.356661
-                },
-
-
-
----
-F02268 Csillebérc, KFKI --> 19868321 Gödöllő, Szabadság tér
-Start time: 09:02 estimated walking time is 547.74 min.
-Solution found! Touched 337 stations. Length of path 10.
-a_star run time:           31.95597 seconds.
-get_neighbours run time:   31.95384 seconds. Number of calls: 58
-.
-09:02 Start                              at  Csillebérc, KFKI                    F02268    .
-09:16 take    221   2210     D0652622398 to  Széll Kálmán tér M                  F02473    . Arrive at 09:37
-09:37 walk 191                         m to  Széll Kálmán tér                    F02481    . Arrive at 09:43
-09:44 take     M2   5200        C9767114 to  Örs vezér tere                      F01749    . Arrive at 10:01
-10:01 walk 195                         m to  Örs vezér tere M+H                  F02762    . Arrive at 10:07
-10:18 take    244   2440      C984171017 to  Ida utca                            F03352    . Arrive at 10:30
-10:32 take     46   0460      C978951446 to  Georgina utca                       F03328    . Arrive at 10:49
-11:02 take     92   0920       D06264115 to  Ilonatelep H                        F03333    . Arrive at 11:05
-11:05 walk 84                          m to  Ilonatelep                          19841302  . Arrive at 11:09
-11:19 take     H8     H8       H11224_37 to  Gödöllő, Szabadság tér              19868321  . Arrive at 11:45
-
----
-F02268 Csillebérc, KFKI --> 19868321 Gödöllő, Szabadság tér
-Start time: 07:00 estimated walking time is 547.74 min.
-Solution found! Touched 191 stations. Length of path 8.
-a_star run time:           15.28208 seconds.
-get_neighbours run time:   15.28107 seconds. Number of calls: 27
-.
-07:00 Start                              at  Csillebérc, KFKI                    F02268    .
-07:18 take    221   2210     D0652622318 to  Széll Kálmán tér M                  F02473    . Arrive at 07:38
-07:38 walk 191                         m to  Széll Kálmán tér                    F02481    . Arrive at 07:44
-07:45 take     M2   5200       C97566418 to  Örs vezér tere                      F01749    . Arrive at 08:02
-08:02 walk 118                         m to  Örs vezér tere                      19795279  . Arrive at 08:07
-08:09 take     H9     H9      H154212_43 to  Cinkota                             19828293  . Arrive at 08:22
-08:22 walk 0                           m to  Cinkota                             19828295  . Arrive at 08:25
-09:17 take     H8     H8       H12121_39 to  Gödöllő, Szabadság tér              19868321  . Arrive at 09:45
-
-19828,Cinkota,47.519435,19.217338,19828,1,station,,
-19828293,Cinkota,47.519435,19.217338,19828,,merged,19828,
-19828294,Cinkota,47.519435,19.217338,19828,,merged,19828,
-19828295,Cinkota,47.519435,19.217338,19828,,merged,19828,
-19828296,Cinkota,47.519435,19.217338,19828,,merged,19828,
-19828641,Cinkota,47.519435,19.217338,19828,,merged,19828,
-19828642,Cinkota,47.519435,19.217338,19828,,merged,19828,
-
-(base) andras.pulai@cohesity.com@MY9KHQPG6QY data % grep -i merged stops.txt| wc -l
-     159
-
-
----
-F01749 Örs vezér tere --> 19868321 Gödöllő, Szabadság tér
-Start time: 09:01 estimated walking time is 326.57 min.
-Solution found! Touched 63 stations. Length of path 3.
-a_star run time:            2.23070 seconds.
-get_neighbours run time:    2.23043 seconds. Number of calls: 5
-.
-09:01 Start                              at  Örs vezér tere                      F01749    .
-09:01 walk 118                         m to  Örs vezér tere                      19795278  . Arrive at 09:06
-09:33 take     H8     H8      H109224_37 to  Gödöllő, Szabadság tér              19868321  . Arrive at 10:15
-
----
-F01749 Örs vezér tere --> 19868321 Gödöllő, Szabadság tér
-Start time: 10:01 estimated walking time is 326.57 min.
-Solution found! Touched 238 stations. Length of path 7.
-a_star run time:           26.72372 seconds.
-get_neighbours run time:   26.72219 seconds. Number of calls: 49
-.
-10:01 Start                              at  Örs vezér tere                      F01749    .
-10:01 walk 195                         m to  Örs vezér tere M+H                  F02762    . Arrive at 10:07
-10:18 take    244   2440      C984171017 to  Ida utca                            F03352    . Arrive at 10:30
-10:32 take     46   0460      C978951446 to  Georgina utca                       F03328    . Arrive at 10:49
-11:02 take     92   0920       D06264115 to  Ilonatelep H                        F03333    . Arrive at 11:05
-11:05 walk 84                          m to  Ilonatelep                          19841302  . Arrive at 11:09
-11:19 take     H8     H8       H11224_37 to  Gödöllő, Szabadság tér              19868321  . Arrive at 11:45

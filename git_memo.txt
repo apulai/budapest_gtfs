@@ -32,8 +32,6 @@ Utána meg létrehoztuk és felpusholtuk.
 
 
 
-
-
 To Track Large Files
 git lfs track stop_times_with_min.csv
 git add .gitattributes
