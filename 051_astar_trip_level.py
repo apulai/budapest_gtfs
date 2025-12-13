@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 import heapq
 from collections import defaultdict
+
+from webcolors import hex_to_rgb_percent
+
 import mod_distance
 import mod_loader as myload
 import time
@@ -34,28 +37,6 @@ def getminutestowalk(dst, walkspeed=3.5):
     walkspeed = walkspeed * 1000 / 60
     return dst / walkspeed
 
-
-def get_neighbours_csak_utvonal(stop_id):
-    neigbours = []
-    routing = []
-
-    # Ahova at lehet sétálni ebben a megállóban
-    for s in stop_and_nearstops[stop_id]["nearest_stops"]:
-        dst = int(s["distance"])
-        neigbours.append({"stop_id": s["stop_id"], "distance": dst, "instruction": 'walk'})
-
-    # Amelyik vonalak megállnak ebben a megállóban azoknak az állomásai
-    if routes_available_from_stops.get(stop_id) != None:
-        for r in routes_available_from_stops[stop_id]["routes"]:
-            # Kizártam az éjszakai járatokat, mert azokat nem ismerem
-            # Meg valamiért előszerettel választja az algoritmus
-            if r.isnumeric() and int(r) > 8999:
-                continue
-            for s in stops_along_routes_nodirections[r]["list_of_stops"]:
-                neigbours.append({"stop_id": s["stop_id"], "route": r, "instruction": "take"})
-
-    return neigbours
-
 #
 def get_neighbours(node):
     neigbours = []
@@ -76,12 +57,18 @@ def get_neighbours(node):
     stop_id = node["stop_id"]
     arrival_time_min = node["arrival_time_min"]
 
+    # At some end stations it happens that a train arrives and starts from the same
+    # location, this is why I can not just droup duplicated by "route_id" but also need direction
+    # Like at H8: trip1 from Ors to Godollo, trip2 from Godollo to Ors, I need to keep all different directions!
+    #
     df_megallo_jaratok = pd.merge(
         df_stop_times.query(f'stop_id == "{stop_id}" and arrival_time_min > {arrival_time_min}'), df_trips,
-        left_on="trip_id", right_on="trip_id").sort_values(["arrival_time_min"]).drop_duplicates("route_id")
+        left_on="trip_id", right_on="trip_id").sort_values(["arrival_time_min"]).drop_duplicates(subset=["route_id","direction_id"], keep='first')
+
     a = df_stops.query(f'stop_id == "{stop_id}"')["stop_name"]
     stop_name = a.values[0]
     df_megallo_jaratok["stop_name"] = stop_name
+
     # This is just some cosmetics, adding stop names for debugging
     df_megallo_jaratok2 = pd.merge(df_megallo_jaratok, df_routes[["route_id", "route_short_name"]], left_on="route_id",
                                    right_on="route_id")
@@ -103,23 +90,22 @@ def get_neighbours(node):
     # than the arrival time of my starting stop
     indices_to_drop = df_szomszedok2[df_szomszedok2["arrival_time_min_x"] > df_szomszedok2["arrival_time_min"]].index
     df_szomszedok2.drop(indices_to_drop, inplace=True)
-    #
+
+
     # I do not want to see the starting stop either in the results
     indices_to_drop = df_szomszedok2[df_szomszedok2["stop_id_x"] == df_szomszedok2["stop_id"]].index
     df_szomszedok2.drop(indices_to_drop, inplace=True)
+
+    # I will return only the unique neighbours
+    df_szomszedok2.drop_duplicates(["stop_id"], inplace=True)
 
     # Add the instrcution: it is always take!
     df_szomszedok2["instruction"] = "take"
 
     retdict = df_szomszedok2[
-        ["stop_id", "trip_id", "route_short_name", "stop_name", "departure_time_min_x", "arrival_time_min", "instruction", "stop_lon",
+        ["stop_id", "trip_id", "trip_headsign", "route_short_name", "stop_name", "departure_time_min_x", "arrival_time_min", "instruction", "stop_lon",
          "stop_lat", "route_id"]].to_dict(
         'records')
-
-    # Ezt itt nem jó sokra egyelőre!
-    #for nb in retdict:
-    #    dst = hvdst(node["stop_id"],nb["stop_id"])
-    #    nb["distance"]=dst
 
     return neigbours + retdict
 
@@ -165,16 +151,18 @@ def print_results(total_path, instructions):
 
         if node["instruction"].startswith("walk"):
             dst = node.get("distance", -1)
-            istr = f'{min_to_str_time(node["departure_time_min_x"])} walk {dst:<28}m to  {stops[node["stop_id"]]["stop_name"]:<35} {node["stop_id"]:<10}. Arrive at {min_to_str_time(node["arrival_time_min"])}'
+            dststr = str(dst)+'m'
+            istr = f'{min_to_str_time(node["departure_time_min_x"])} walk {dststr:<61}to  {stops[node["stop_id"]]["stop_name"]:<35} {node["stop_id"]:<10}. Arrive at {min_to_str_time(node["arrival_time_min"])}'
         elif node["instruction"].startswith("take"):
-            istr = f'{min_to_str_time(node["departure_time_min_x"])} take {node["route_short_name"]:>6} {node["route_id"]:>6} {node["trip_id"]:>15} to  {node["stop_name"]:<35} {node["stop_id"]:<10}. Arrive at {min_to_str_time(node["arrival_time_min"])}'
+            hsstr = '(>'+node.get("trip_headsign","---")+')'
+            istr = f'{min_to_str_time(node["departure_time_min_x"])} take {node["route_short_name"]:>6} {hsstr:<30} {node["route_id"]:>6} {node["trip_id"]:>15} to  {node["stop_name"]:<35} {node["stop_id"]:<10}. Arrive at {min_to_str_time(node["arrival_time_min"])}'
         elif node["instruction"].startswith("start"):
             node["stop_name"] = stops[node["stop_id"]]["stop_name"]
-            istr = f'{min_to_str_time(node["arrival_time_min"])} Start                              at  {node["stop_name"]:<35} {node["stop_id"]:<10}.'
+            istr = f'{min_to_str_time(node["arrival_time_min"])} Start {' ':<59} at  {node["stop_name"]:<35} {node["stop_id"]:<10}.'
 
         elif node["instruction"].startswith("arrive"):
             node["stop_name"] = stops[node["stop_id"]]["stop_name"]
-            istr = f'{min_to_str_time(node["departure_time_min_x"])} Arrive                             at  {node["stop_name"]:<35} {node["stop_id"]:<10} at {min_to_str_time(node["arrival_time_min"])}'
+            istr = f'{min_to_str_time(node["departure_time_min_x"])} Arrive at {' ':<55} {node["stop_name"]:<35} {node["stop_id"]:<10} at {min_to_str_time(node["arrival_time_min"])}'
         else:
             istr = f'Should not reach this!'
         print(istr)
@@ -200,13 +188,16 @@ def a_star(start_node, goal_node, h, get_neighbours, d):
     # The set of discovered nodes (using a min-heap)
     open_set = []
 
+    # Nodes already evaluated
+    closed_set_hash = {}
+
     # Counter to avoid any possibility of equal values (distances) that would
     # confuse_min heap calucations
     # using a 'counter' this way will also guarantee, that the first inserted
     # value come back as first if the distabce (primary measure) is the same
     counter = 0
     runtime_nb = 0
-    called_neighbours = 0
+    numcalls_fn_neighbours = 0
 
     # Dict for storing instuctions for each node
     instructions = {}
@@ -244,11 +235,7 @@ def a_star(start_node, goal_node, h, get_neighbours, d):
         # minutes, counter, node
         oset_min_fscore, oset_cntr, current_node_stop_id = heapq.heappop(open_set)
         open_set_hash.remove(current_node_stop_id)
-
-        #print("POP")
-
-        #DEBUG if current_node_stop_id in ["F00189", "F00181", "F00183"] :
-        #DEBUG print("Jo megallo")
+        closed_set_hash[current_node_stop_id] = current_node_stop_id
 
         if current_node_stop_id == goal_id:
             total_path = reconstruct_path(came_from, current_node_stop_id)
@@ -256,7 +243,7 @@ def a_star(start_node, goal_node, h, get_neighbours, d):
             stop_time = time.time()
             runtime = stop_time - start_time
             print(f"a_star run time:         {runtime:10.5f} seconds.")
-            print(f"get_neighbours run time: {runtime_nb:10.5f} seconds. Number of calls: {called_neighbours}\n.")
+            print(f"get_neighbours run time: {runtime_nb:10.5f} seconds. Number of calls: {numcalls_fn_neighbours}\n.")
 
             return total_path, instructions
 
@@ -264,26 +251,26 @@ def a_star(start_node, goal_node, h, get_neighbours, d):
 
         start_time_nb = time.time()
         neighbours = get_neighbours(instructions[current_node_stop_id])
-        called_neighbours = called_neighbours + 1
+        numcalls_fn_neighbours = numcalls_fn_neighbours + 1
         stop_time_nb = time.time()
         runtime_nb = runtime_nb + stop_time_nb - start_time_nb
 
         for idx, neighbour in enumerate(neighbours):
 
-            #DEBUG if neighbour["stop_id"] in ["F00189", "F00181", "F00183"]:
-            #DEBUG    print("Jo megallo")
-            #DEBUG     #tp = reconstruct_path(came_from, neighbour)
-            #DEBUG     #print_results(tp)
+            if closed_set_hash.get(neighbour["stop_id"]) is not None:
+                #print("closed set hashben")
+                continue
 
             # Calculate tentative g_score
             nb_tentative_gscore = neighbour["arrival_time_min"]
 
-            #DEBUG
+
             # If g_score is higher than it would be better to walk
             # simply continue
             if nb_tentative_gscore > start_node["arrival_time_min"] + timetogoal:
                  continue
 
+            #DEBUG
             #if neighbour["stop_id"] == "F02578" or neighbour["stop_id"] == "F02597" or neighbour["stop_id"] =='F01083' :
             #    print(neighbour)
             # try:
@@ -314,15 +301,7 @@ def a_star(start_node, goal_node, h, get_neighbours, d):
                         print('     ', end="")
                     print(f' G_curr: {g_score[instructions[current_node_stop_id]["stop_id"]]:8.3f} G_nb: {nb_tentative_gscore:8.3f}    F_curr: {f_score[instructions[current_node_stop_id]["stop_id"]]:8.3f} {instructions[current_node_stop_id]["stop_id"]:6}  F_nb: {f_score[neighbour["stop_id"]]:8.3f} total_dst:{hvdst(neighbour["stop_id"],goal_id):8.2f}')
 
-                #DEBUG if neighbour["stop_id"] in ["F00189", "F00181", "F00183"]:
-                #DEBUG     print("Jo megallo")
-                #DEBUG     #tp = reconstruct_path(came_from, neighbour["stop_id"] )
-                #DEBUG     #print_results(tp, instructions)
-
                 if neighbour["stop_id"] not in open_set_hash:
-
-                    #DEBUGif neighbour["stop_id"] == "F02578" or neighbour["stop_id"] == "F02597" or neighbour["stop_id"] == 'F01083':
-                    #DEBUG    print(neighbour)
 
                     heapq.heappush(open_set, (f_score[neighbour["stop_id"]], counter, neighbour["stop_id"]))
                     counter = counter + 1
@@ -333,10 +312,17 @@ def a_star(start_node, goal_node, h, get_neighbours, d):
                     #     open_set_hash.add(neighbour["stop_id"])
                     # except:
                     #     print(f'Hiba:  {f_score[neighbour["stop_id"]]} {neighbour["stop_id"]} {stops[neighbour["stop_id"]]["stop_name"]:<30} ')
+                else:
+                    for idx,elem in enumerate(open_set):
+                        fscore, cnt, stop_id = elem
+                        if stop_id == neighbour["stop_id"]:
+                            open_set[idx] = open_set[-1]
+                            open_set.pop()
+                            heapq.heapify(open_set)
+                            break
+                    heapq.heappush(open_set, (f_score[neighbour["stop_id"]], counter, neighbour["stop_id"]))
+                    counter = counter + 1
 
-
-
-        #DEBUG print("next POP")
 
     # No path found
     print("No path found")
@@ -344,7 +330,7 @@ def a_star(start_node, goal_node, h, get_neighbours, d):
     stop_time = time.time()
     runtime = stop_time - start_time
     print(f"a_star run time:         {runtime:10.5f} seconds.")
-    print(f"get_neighbours run time: {runtime_nb:10.5f} seconds. Number of calls: {called_neighbours}\n.")
+    print(f"get_neighbours run time: {runtime_nb:10.5f} seconds. Number of calls: {numcalls_fn_neighbours}\n.")
 
     return None
 
@@ -393,14 +379,22 @@ print("Loaded stops.txt to pandas df")
 df_stop_times = pd.read_csv("preproc/stop_times_with_min.csv")
 print("Loaded stop_times.txt to pandas df")
 
-arrival_time_min = str_time_to_min("09:02:00")
-nF00191 = {"stop_id": "F00191", "instruction": 'start', 'arrival_time_min': arrival_time_min}
-nF00189 = {"stop_id": "F00189", "instruction": 'arrive', 'arrival_time_min': arrival_time_min + 2}
-nF01081 = {"stop_id": "F01081", "instruction": 'arrive', 'arrival_time_min': arrival_time_min + 5}
+# arrival_time_min = str_time_to_min("09:02:00")
+# nF00191 = {"stop_id": "F00191", "instruction": 'start', 'arrival_time_min': arrival_time_min}
+# nF00189 = {"stop_id": "F00189", "instruction": 'arrive', 'arrival_time_min': arrival_time_min + 2}
+# nF01081 = {"stop_id": "F01081", "instruction": 'arrive', 'arrival_time_min': arrival_time_min + 5}
+# rvF00191 = get_neighbours(nF00191)
+# rvF00189 = get_neighbours(nF00189)
+# rvF00181 = get_neighbours(nF01081)
 
-rvF00191 = get_neighbours(nF00191)
-rvF00189 = get_neighbours(nF00189)
-rvF00181 = get_neighbours(nF01081)
+arrival_time_min = str_time_to_min("09:02:00")
+nF01749 = {"stop_id": "F01749", "instruction": 'start', 'arrival_time_min': arrival_time_min}
+n19795278 = {"stop_id": "19795278", "instruction": 'start', 'arrival_time_min': arrival_time_min + 2}
+n19795279 = {"stop_id": "19795279", "instruction": 'start', 'arrival_time_min': arrival_time_min + 5}
+
+rvF01749 = get_neighbours(nF01749)
+rv19795278 = get_neighbours(n19795278)
+rv19795279 = get_neighbours(n19795279)
 
 test_journeys = [
     {
@@ -445,6 +439,32 @@ test_journeys = [
         "start_node": {"stop_id": "F02268", "instruction": 'start', 'arrival_time_min': arrival_time_min},
         "goal_node": {"stop_id": "19868321", "instruction": 'arrive', 'arrival_time_min': arrival_time_min + 600}
     },
+    {
+        # "start_stop": "F02268", # KFKI
+        # "final_stop": "19868321" # Gödöllő, Szabadság tér
+        "start_node": {"stop_id": "F02268", "instruction": 'start', 'arrival_time_min': 420},
+        "goal_node": {"stop_id": "19868321", "instruction": 'arrive', 'arrival_time_min': 420 + 120}
+    },
+    {
+        # "start_stop": "F01749", # Örs (601)
+        # "final_stop": "19868321" # Gödöllő, Szabadság tér
+        "start_node": {"stop_id": "F01749", "instruction": 'start', 'arrival_time_min': 541},
+        "goal_node": {"stop_id": "19868321", "instruction": 'arrive', 'arrival_time_min': 640}
+    },
+    {
+        # "start_stop": "F01749", # Örs (601)
+        # "final_stop": "19868321" # Gödöllő, Szabadság tér
+        "start_node": {"stop_id": "F01749", "instruction": 'start', 'arrival_time_min': 601},
+        "goal_node": {"stop_id": "19868321", "instruction": 'arrive', 'arrival_time_min': 700}
+    },
+    {
+        # "start_stop": "19868321" # Gödöllő, Szabadság tér
+        # "final_stop": "F02268", # KFKI
+        "start_node": {"stop_id": "19868321", "instruction": 'start', 'arrival_time_min': arrival_time_min + 600},
+        "goal_node": {"stop_id": "F02268", "instruction": 'arrive', 'arrival_time_min': arrival_time_min}
+
+    },
+
     {
         # "start_stop": "F02268", # KFKI
         # "final_stop": "009019" # Gödöllő, Palotakert

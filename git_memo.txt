@@ -1,0 +1,56 @@
+git checkout -b backup-branch
+This creates a safety backup. Once you've run this, what branch does git branch show you're on?
+
+git checkout main
+Once you've done that, confirm you're on the main branch. What does git branch show now?
+
+Great! Now we'll create a single new commit with all your current files. Run these commands:
+
+Copied!
+git reset --soft $(git rev-list --max-parents=0 HEAD)
+git commit -m "Initial commit"
+The first line resets to the very first commit but keeps all your files staged. The second creates one fresh commit with everything.
+
+After running these, what does git log --oneline show? (You should see just one commit.)
+
+git push origin main --force
+
+git branch -D backup-branch
+
+git lfs prune removes local LFS files that are no longer referenced by any commits.
+
+But the old LFS objects will still exist on GitHub's servers (taking up your LFS storage quota).
+
+The only reliable way to actually delete them from GitHub is to delete and recreate the repository, or contact GitHub support to request LFS storage cleanup.
+
+Itt kitöröltük a budapest_gtfs repót.
+
+git lfs track data/*
+git lfs track preproc/*
+
+Utána meg létrehoztuk és felpusholtuk.
+
+
+
+
+
+To Track Large Files
+git lfs track stop_times_with_min.csv
+git add .gitattributes
+git add file.psd
+git commit -m "Add design file"
+git push origin main
+
+GIT lfs javítas
+https://stackoverflow.com/questions/77052450/why-am-i-unable-to-push-large-files-to-github-despite-tracking-with-git-lfs
+
+git lfs migrate import --include="preproc/stop_times_with_min.csv"
+git add .gitattributes
+git add preproc/.gitattributes
+git add preproc/stop_times_with_min.csv
+git push origin main
+
+GIT reset, már nem kellenek a régi megálló pontok!
+
+git lfs track data/*
+git lfs track preproc/*
