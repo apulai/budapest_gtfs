@@ -1,7 +1,22 @@
 
 
-Ez a futás eltűnt, miután frissíttem a szomszédok keresését (2025.12.13)
+Ez a futás megjavult, miután frissíttem a szomszédok keresését (2025.12.13)
 
+javított:
+F02268 Csillebérc, KFKI --> 19869324 Gödöllő, Palotakert
+Start time: 09:02 estimated walking time is 559.25 min.
+Solution found! Touched 237 stations. Length of path 6.
+a_star run time:            7.96753 seconds.
+get_neighbours run time:    7.94510 seconds. Number of calls: 15
+.
+09:02 Start                                                             at  Csillebérc, KFKI                    F02268    .
+09:16 take    221 (>Széll Kálmán tér M)            2210     D0652622398 to  Széll Kálmán tér M                  F02473    . Arrive at 09:37
+09:37 walk 191m                                                         to  Széll Kálmán tér                    F02481    . Arrive at 09:43
+09:44 take     M2 (>Örs vezér tere)                5200        C9767114 to  Örs vezér tere                      F01749    . Arrive at 10:01
+10:01 walk 118m                                                         to  Örs vezér tere                      19795278  . Arrive at 10:06
+10:33 take     H8 (>Gödöllő)                         H8       H11127_37 to  Gödöllő, Palotakert                 19869324  . Arrive at 11:18
+
+régebbi:
 F02268 Csillebérc, KFKI --> 19868321 Gödöllő, Szabadság tér
 Start time: 09:02 estimated walking time is 547.74 min.
 Solution found! Touched 545 stations. Length of path 9.
