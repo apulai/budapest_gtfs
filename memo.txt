@@ -12,10 +12,45 @@ To save my data
 zip -r budapest_gtfs.zip budapest_gtfs -x "*/.venv/*"
 zip -r budapest_gtfs.zip budapest_gtfs -x budapest_gtfs/.git/\*  budapest_gtfs/.venv/\*
 
+The best algorithms for GTFS data focus on finding optimal trips, with Dijkstra's algorithm (and its variants like A*) being fundamental for shortest path routing, while Graph Neural Networks (GNNs) and LSTMs excel for complex real-time predictions like delays, often using efficient data structures like Redis for speed and Parquet for storage/analytics. The choice depends on the goal: Dijkstra for static journey planning, machine learning for dynamic forecasting.
+For Journey Planning (Static/Scheduled)
+Dijkstra's Algorithm / A* Search: The backbone for finding the quickest routes (fewest transfers, shortest time) between stops, treating the transit network as a graph where stops are nodes and travel/wait times are edge weights.
+Customized Heuristics: Optimizations to Dijkstra's, like only considering relevant next trips (e.g., those leaving within the next hour) rather than all scheduled trips, significantly boost performance.
+For Real-Time & Predictive Analytics (GTFS-RT)
+Recurrent Neural Networks (RNNs) & LSTMs: Excellent for predicting delays or arrival times, as they capture temporal patterns in sequence data.
+Graph Neural Networks (GNNs): Increasingly popular for modeling complex transit networks and predicting disruptions or demand.
+Redis (Key-Value Store): Used for ultra-fast lookups of trip timings and route information, mapping inputs (route, stops, time) to outputs directly using hashes.
+For Data Handling & Storage
+Apache Parquet/GeoParquet: Highly efficient columnar storage for massive GTFS Realtime datasets, enabling faster compression and analytics with tools like Polars and GeoPandas.
+Key Takeaway
+Start with Dijkstra's for basic routing; integrate Redis for speed; use LSTMs/GNNs for sophisticated prediction; and leverage Parquet for handling large-scale real-time data efficiently.
 
-git reset --soft $(git rev-list --max-parents=0 HEAD)
-git commit -m "Initial commit"
-git log --oneline
-git push origin main --force
 
+Próbáltam járatindulási frekvenciákat számolni, de ez asszem nem lesz jó igy:
+    "F00094": {
+        "freq": {
+            "5200": 2425
+        },
+        "routes": [
+            "5200"
+        ],
+        "numtrips": 2425
 
+Egy nap van 1440 perc. És az F00094 megállóban lenne 2425 járatindulás?
+Annyira hihetetlen, hogy megnéztem shellből is:
+
+grep F00094 stop_times.txt | sort -t,  -k3 | cat -n
+És lám tényleg:
+Példa arra, amikor 6 bejegyzés van ugyanarra az indulási időre:
+
+ 1392	C97671351,F00094,15:38:15,15:38:15,0,,,1,0.0
+  1393	C98301261,F00094,15:38:15,15:38:15,0,,,1,0.0
+  1394	D00834240,F00094,15:38:15,15:38:15,0,Örs vezér tere,,1,0.0
+  1395	D08741281,F00094,15:38:15,15:38:15,0,Örs vezér tere,,1,0.0
+  1396	C98853193,F00094,15:38:40,15:38:40,0,Örs vezér tere,,1,0.0
+  1397	C98855198,F00094,15:38:40,15:38:40,0,Örs vezér tere,,1,0.0
+
+És a végén tényleg ott van a 2425 sor:
+  2423	D08593578,F00094,28:03:35,28:03:35,0,Örs vezér tere,,1,0.0
+  2424	D08593619,F00094,28:13:35,28:13:35,0,Örs vezér tere,,1,0.0
+  2425	D08593496,F00094,28:23:35,28:23:35,0,Örs vezér tere,,1,0.0

@@ -31,21 +31,33 @@ for e in stop_times:
     trip_id = e["trip_id"]
     arrival_time = e["arrival_time"]
     stop_sequence = e["stop_sequence"]
+    # Lookup
     route_id = trips[trip_id]["route_id"]
 
     if stop_id not in routes_available_from_stops.keys():
         routes_available_from_stops[stop_id] = {}
+        routes_available_from_stops[stop_id]["freq"] = {}
         routes_available_from_stops[stop_id]["routes"]=[]
         routes_available_from_stops[stop_id]["trips"]=[]
+        routes_available_from_stops[stop_id]["freq"][route_id] = 0
+
 
     if route_id not in routes_available_from_stops[stop_id]["routes"]:
         routes_available_from_stops[stop_id]["routes"].append(route_id)
 
     if trip_id not in routes_available_from_stops[stop_id]["trips"]:
         routes_available_from_stops[stop_id]["trips"].append(trip_id)
+        try:
+            routes_available_from_stops[stop_id]["freq"][route_id]=routes_available_from_stops[stop_id]["freq"][route_id]+1
+        except:
+            routes_available_from_stops[stop_id]["freq"][route_id]=1
 
     if cntr % 1000 == 0:
         print(cntr)
+
+for k in routes_available_from_stops.keys():
+    routes_available_from_stops[k]["numtrips"] = len(routes_available_from_stops[k]["trips"])
+    del routes_available_from_stops[k]["trips"]
 
 export_filename=('preproc/routes_available_from_stops.json')
 with open(export_filename, 'w') as fp:
