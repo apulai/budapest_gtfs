@@ -80,15 +80,18 @@ def load_stop_times(filename):
                 headers = row
                 continue
             #print(row)
-            (trip_id,stop_id,arrival_time,departure_time,stop_sequence,stop_headsign,pickup_type,drop_off_type,shape_dist_traveled) = row
-            d = {
-                "trip_id": trip_id,
-                "stop_id": stop_id,
-                "arrival_time": arrival_time,
-                "departure_time": departure_time,
-                "stop_sequence": stop_sequence
-            }
-            list_stop_times.append(d)
+            try:
+                (trip_id,stop_id,arrival_time,departure_time,stop_sequence,stop_headsign,pickup_type,drop_off_type,shape_dist_traveled) = row
+                d = {
+                    "trip_id": trip_id,
+                    "stop_id": stop_id,
+                    "arrival_time": arrival_time,
+                    "departure_time": departure_time,
+                    "stop_sequence": stop_sequence
+                }
+                list_stop_times.append(d)
+            except:
+                print(f"Error parsing line {cntr}: ", row)
 
     return list_stop_times
 

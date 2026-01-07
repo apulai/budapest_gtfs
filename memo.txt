@@ -27,6 +27,8 @@ Start with Dijkstra's for basic routing; integrate Redis for speed; use LSTMs/GN
 
 
 Próbáltam járatindulási frekvenciákat számolni, de ez asszem nem lesz jó igy:
+F00094,Déli pályaudvar,47.500450,19.024604,F00094,,,CSF00093,2
+
     "F00094": {
         "freq": {
             "5200": 2425
@@ -54,3 +56,6 @@ Példa arra, amikor 6 bejegyzés van ugyanarra az indulási időre:
   2423	D08593578,F00094,28:03:35,28:03:35,0,Örs vezér tere,,1,0.0
   2424	D08593619,F00094,28:13:35,28:13:35,0,Örs vezér tere,,1,0.0
   2425	D08593496,F00094,28:23:35,28:23:35,0,Örs vezér tere,,1,0.0
+
+  Duplikátumok szűrése után
+  line_no: 6181000 , duplicates: 4085797

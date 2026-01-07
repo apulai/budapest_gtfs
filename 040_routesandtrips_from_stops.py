@@ -5,7 +5,7 @@ import mod_loader as myload
 
 filename_routes = "data/routes.txt"
 filename_trips = "data/trips.txt"
-filename_stoptimes = "data/stop_times.txt"
+filename_stoptimes = "preproc/stop_times_cleaned.txt"
 filename_stops = "data/stops.txt"
 
 

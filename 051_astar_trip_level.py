@@ -11,7 +11,7 @@ import time
 
 filename_routes = "data/routes.txt"
 filename_trips = "data/trips.txt"
-filename_stoptimes = "data/stop_times.txt"
+filename_stoptimes = "preproc/stop_times.txt"
 filename_stops = "data/stops.txt"
 filename_stops_and_nearstops = "preproc/stops_w_nearstops.json"
 filename_routes_available_from_stops = "preproc/routes_available_from_stops.json"
@@ -257,9 +257,9 @@ def a_star(start_node, goal_node, h, get_neighbours, d):
 
         for idx, neighbour in enumerate(neighbours):
 
-            if closed_set_hash.get(neighbour["stop_id"]) is not None:
-                #print("closed set hashben")
-                continue
+            #if closed_set_hash.get(neighbour["stop_id"]) is not None:
+            #    #print("closed set hashben")
+            #    continue
 
             # Calculate tentative g_score
             nb_tentative_gscore = neighbour["arrival_time_min"]
@@ -312,16 +312,16 @@ def a_star(start_node, goal_node, h, get_neighbours, d):
                     #     open_set_hash.add(neighbour["stop_id"])
                     # except:
                     #     print(f'Hiba:  {f_score[neighbour["stop_id"]]} {neighbour["stop_id"]} {stops[neighbour["stop_id"]]["stop_name"]:<30} ')
-                else:
-                    for idx,elem in enumerate(open_set):
-                        fscore, cnt, stop_id = elem
-                        if stop_id == neighbour["stop_id"]:
-                            open_set[idx] = open_set[-1]
-                            open_set.pop()
-                            heapq.heapify(open_set)
-                            break
-                    heapq.heappush(open_set, (f_score[neighbour["stop_id"]], counter, neighbour["stop_id"]))
-                    counter = counter + 1
+                # else:
+                #     for idx,elem in enumerate(open_set):
+                #         fscore, cnt, stop_id = elem
+                #         if stop_id == neighbour["stop_id"]:
+                #             open_set[idx] = open_set[-1]
+                #             open_set.pop()
+                #             heapq.heapify(open_set)
+                #             break
+                #     heapq.heappush(open_set, (f_score[neighbour["stop_id"]], counter, neighbour["stop_id"]))
+                #     counter = counter + 1
 
 
     # No path found

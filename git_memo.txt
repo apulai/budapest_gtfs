@@ -1,3 +1,10 @@
+Memo1
+git reset --soft $(git rev-list --max-parents=0 HEAD)
+git commit -m "Initial commit"
+git log --oneline
+git push origin main --force
+
+Memo2: itt az LTFS objektumokat akartam kitörölni
 git checkout -b backup-branch
 This creates a safety backup. Once you've run this, what branch does git branch show you're on?
 
